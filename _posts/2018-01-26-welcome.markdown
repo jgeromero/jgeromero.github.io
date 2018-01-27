@@ -1,0 +1,12 @@
+---
+layout: post
+title:  "Welcome!"
+date:   2018-01-26 20:53:34 -0500
+tags:
+  - other
+new: new
+---
+
+<h2>Welcome</h2>
+
+My intention with this blog is to share technical knowledge in networks and computer systems. Welcome!

@@ -24,18 +24,14 @@
   }
 })();
 
-var _gaq = [
-  ['_setAccount', 'ADDACCOUNT-HERE'],
-  ['_setCustomVar', 1, 'document.querySelector', document.querySelector + '', 3],
-  ['_trackPageview']
-];
-(function(d) {
-  var script = d.createElement('script'),
-      head   = d.getElementsByTagName('head')[0];
-  script.async = true;
-  script.src = 'http://www.google-analytics.com/ga.js';
-  head.insertBefore(script, head.firstChild);
-})(document);
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-113152148-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-113152148-1');
+</script>
 
 document.documentElement.onclick = function(e) {
   e = e || window.event;

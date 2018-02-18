@@ -7,6 +7,6 @@ tags:
 new: new
 ---
 
-<h2>Welcome</h2>
+<h2>Welcome!</h2>
 
-My intention with this blog is to share technical knowledge in networks and computer systems. Welcome!
+Hi all, this blog will serve as a place holder for me to keep notes and share some of my technical experiences. Thank you for visiting. 

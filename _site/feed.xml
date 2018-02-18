@@ -1,3 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-01-26T23:37:35-05:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Welcome!</title><link href="http://localhost:4000/2018/01/26/welcome.html" rel="alternate" type="text/html" title="Welcome!" /><published>2018-01-26T20:53:34-05:00</published><updated>2018-01-26T20:53:34-05:00</updated><id>http://localhost:4000/2018/01/26/welcome</id><content type="html" xml:base="http://localhost:4000/2018/01/26/welcome.html">&lt;h2&gt;Welcome&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-02-18T00:54:17-05:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Policy Statments for dynamic IGPs</title><link href="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html" rel="alternate" type="text/html" title="Policy Statments for dynamic IGPs" /><published>2018-02-18T00:16:00-05:00</published><updated>2018-02-18T00:16:00-05:00</updated><id>http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs</id><content type="html" xml:base="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html">&lt;h2&gt;Policy Statements for dynamic IGPs&lt;/h2&gt;
 
-&lt;p&gt;My intention with this blog is to share technical knowledge in networks and computer systems. Welcome!&lt;/p&gt;</content><author><name></name></author><category term="other" /><summary type="html">Welcome</summary></entry></feed>
+&lt;p&gt;I thought about writing about this policy-statement I came across the other day:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;term 10 {
+    from {
+        protocol [ static direct ];
+        route-filter 10.50.0.0/16 orlonger;
+    }
+    then accept;
+}
+term 100 {
+    then reject;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This policy statement is used to export (inject) routes into IS-IS. The key thing to remember here is the route filter applies to anything in the routing table that comes from static or direct routes:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;jromero@mx-480&amp;gt; show route protocol static
+
+And
+
+jromero@mx-480&amp;gt; show route protocol direct
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Keep in mind that if you match &lt;code class=&quot;highlighter-rouge&quot;&gt;exact&lt;/code&gt; prefixes in your route-filter then your routing table should have an active aggregate route:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;jromero@mx-480&amp;gt; show route protocol aggregate
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="juniper" /><summary type="html">Policy Statements for dynamic IGPs</summary></entry><entry><title type="html">Welcome!</title><link href="http://localhost:4000/2018/01/26/welcome.html" rel="alternate" type="text/html" title="Welcome!" /><published>2018-01-26T20:53:34-05:00</published><updated>2018-01-26T20:53:34-05:00</updated><id>http://localhost:4000/2018/01/26/welcome</id><content type="html" xml:base="http://localhost:4000/2018/01/26/welcome.html">&lt;h2&gt;Welcome!&lt;/h2&gt;
+
+&lt;p&gt;Hi all, this blog will serve as a place holder for me to keep notes and share some of my technical experiences. Thank you for visiting.&lt;/p&gt;</content><author><name></name></author><category term="other" /><summary type="html">Welcome!</summary></entry></feed>

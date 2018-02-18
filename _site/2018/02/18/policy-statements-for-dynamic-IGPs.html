@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Networking rants and findings, by jgeromero">
+
+    <title>Policy Statments for dynamic IGPs — </title>
+
+    <link rel="stylesheet" href="/css/master.css">
+    <link rel="alternate" type="application/rss+xml" title="" href="http://localhost:4000/feed.xml">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  </head>
+  <body>
+    <div id="outer-wrapper">
+      <div id="wrapper">
+
+        <h1 class="blog-title">
+  <a href="/">Rollback0</a>
+</h1>
+
+<p class="blog-author">by Jorge</p>
+<p class="blog-slogan">Exploring Networking by example</p>
+
+
+        <div class="content">
+
+          <a href="/" class="back-to-front" title="Back to all posts">&larr; back</a>
+
+          <span class="post-num-words">
+            127 <span>words</span>
+          </span>
+
+          <span class="post-date">
+            18 February 2018
+          </span>
+
+          <h2>Policy Statements for dynamic IGPs</h2>
+
+<p>I thought about writing about this policy-statement I came across the other day:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>term 10 {
+    from {
+        protocol [ static direct ];
+        route-filter 10.50.0.0/16 orlonger;
+    }
+    then accept;
+}
+term 100 {
+    then reject;
+}
+</code></pre></div></div>
+
+<p>This policy statement is used to export (inject) routes into IS-IS. The key thing to remember here is the route filter applies to anything in the routing table that comes from static or direct routes:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jromero@mx-480&gt; show route protocol static
+
+And
+
+jromero@mx-480&gt; show route protocol direct
+
+</code></pre></div></div>
+
+<p>Keep in mind that if you match <code class="highlighter-rouge">exact</code> prefixes in your route-filter then your routing table should have an active aggregate route:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jromero@mx-480&gt; show route protocol aggregate
+
+</code></pre></div></div>
+
+
+          
+          <div id="disqus_thread"></div>
+          <script>
+          (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://rollback0.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+          })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+  <div class="wrapper">
+    Copyright &copy; 2017-2018 <a href="http://twitter.com/jgeromero">"jgeromero"</a> Jorge -
+    Powered by <a href="http://jekyllrb.com/">Jekyll</a> and <a href="http://pages.github.com/">Github Pages</a>
+  </div>
+</div>
+
+
+    <script src="/js/master.js"></script>
+
+  </body>
+</html>

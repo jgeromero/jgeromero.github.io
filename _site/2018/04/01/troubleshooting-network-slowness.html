@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Networking rants and findings, by jgeromero">
+
+    <title>Troubleshooting Network Slowness — </title>
+
+    <link rel="stylesheet" href="/css/master.css">
+    <link rel="alternate" type="application/rss+xml" title="" href="http://localhost:4000/feed.xml">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  </head>
+  <body>
+    <div id="outer-wrapper">
+      <div id="wrapper">
+
+        <h1 class="blog-title">
+  <a href="/">Rollback0</a>
+</h1>
+
+<p class="blog-author">by Jorge</p>
+<p class="blog-slogan">Exploring Networking by example</p>
+
+
+        <div class="content">
+
+          <a href="/" class="back-to-front" title="Back to all posts">&larr; back</a>
+
+          <span class="post-num-words">
+            955 <span>words</span>
+          </span>
+
+          <span class="post-date">
+            1 April 2018
+          </span>
+
+          <h2>Troubleshooting Network Slowness</h2>
+
+<h3>First, let's go over some basics:</h3>
+
+<p>Bandwidth vs Throughput</p>
+
+<p>Bandwidth = How wide your channel is. Maximum amount of data that can travel through a channel.
+Throughput = How much data actually travels through the channel successfully. This can be limited by tons of different things.</p>
+
+<h3>Things that may affect throughput:</h3>
+
+<ul>
+  <li>Latency</li>
+  <li>Packet loss</li>
+  <li>Network Congestion</li>
+  <li>Small TCP Receive Windows</li>
+  <li>Traffic shaping and Rate limiting</li>
+</ul>
+
+<p>Maximum Transmission Units (MTU) in ethernet frames are by default 1500 bytes. There’s also a maximum segment size that’s agreed upon a session, looks something like this:</p>
+
+<p><img src="/images/MTU-image-1.png" alt="MTU-image" title="MTU" /></p>
+
+<p><strong>Path MTU Discovery</strong> can be used to discover the maximum MTU size along the path of a TCP connection. You can use ping or tracepath (linux tool) to discover this MTU. Useful when implementing Jumbo Frames (Larger MTUs usually 9000 bytes). MTUs larger than the default should be supported along the path.</p>
+
+<h3> Long Fat Networks (LFN): </h3>
+
+<p><strong>High Bandwidth, High Delay</strong>. The idea behind this is you have a maximum (outstanding) amount of data on the wire on the way to the destination, while the sender is sitting idle waiting for acknowledgements for the data sent. This stop and wait is a waste of bandwidth, since the link is not being fully utilized.</p>
+
+<p>There’s a concept of <strong>Bandwidth Delay Product (BDP)</strong>, which is basically how much outstanding data (not acknowledged) you can ever have on the wire for a given time assuming perfect network conditions. If your Receive Window is smaller than your BDP (often the case with LFNs) then you waste precious bandwidth. The ideal case should be TCP windows fully opening to what the BDP is for that link.</p>
+
+<p>BDP is calculated by taking the maximum data link capacity and multiplying it by the round trip delay <strong>(BxD)</strong>, the results can be given in bits or bytes. LFN have high Bandwidth Delay Products because the amount of outstanding data on the wire lasts for longer time than those with lower BDPs. Therefore, TCP receive windows (max allowed unacknowledged data) negotiated at the beginning of sessions are stressed more often than those lighter not so fat networks. Remember: BDPs for a given link are assuming perfect network conditions.</p>
+
+<p>As a solution to increasing throughput on LFNs, you either increase the TCP receive windows past 65K or lower the delay RTT. Window scaling was created for this reason (rfc7323).</p>
+
+<p>However, here is where <strong>Congestion Control</strong> comes in and <strong>Congestion Windows</strong>. Even if your windows are large enough on the receiver side but your network conditions are not ideal (Congestion, Packet loss etc) your congestion window (which is dynamically adjusted by the protocol) will never fully open, causing you to get much lower throughput.</p>
+
+<p>Here are two pictures showing what congestion windows look like during a TCP session:</p>
+
+<p><img src="/images/cwnd-and-rwnd-glossary.gif" alt="CWND-image" title="cwn-and-rwnd" /></p>
+
+<p><img src="/images/cwnd-1024x203.png" alt="CWND-image-2" title="CWND" /></p>
+
+<h3> Things to keep in mind </h3>
+
+<ul>
+  <li>
+    <p>Congestion Windows are dynamically adjusted throughout the session and are greatly affected/limited by how well and healthy the condition of the network is. (Read more on TCP slow start, Slow Start Thresholds for more detail on congestion control)</p>
+  </li>
+  <li>
+    <p>Receive Windows are dynamically adjusted throughout session, with every ack the sender gets an updated window size, in a healthy network, the congestion window will quickly grow to the maximum window size negotiated. Limitations being max receive window sizes hard set at a number with no window scaling or application not picking up data fast enough from receive buffer. In any case, <strong>the sender is always bound by the cwnd</strong>.</p>
+  </li>
+</ul>
+
+<h3> Finding root cause </h3>
+
+<p>Use IPERF3 (leaner code base than iperf2) to test your throughput and see what your CWND looks like.</p>
+
+<p>Perform tcpdumps while your iperf3 tests are running (Make sure to start your captures before firing your iperf test to capture 3 way handshake so you get proper window sizes negotiated at the beginning of session).</p>
+
+<p>Load pcap caputure into wireshark and create IO graphs using the following filters (inspired by this <a href="https://notalwaysthenetwork.com/2014/04/09/troubleshooting-with-wireshark-io-graphs-part-1/">blog</a> post):</p>
+
+<ul>
+  <li>
+    <p><strong>tcp.analysis.lost_segment</strong> – Indicates we’ve seen a gap in sequence numbers in the capture.  Packet loss can lead to duplicate ACKs, which leads to retransmissions</p>
+  </li>
+  <li>
+    <p><strong>tcp.analysis.duplicate_ack</strong> – displays packets that were acknowledged more than one time.  A high number of duplicate ACKs is a sign of possible high latency between TCP endpoints</p>
+  </li>
+  <li>
+    <p><strong>tcp.analysis.retransmission</strong> – Displays all retransmissions in the capture.  A few retransmissions are OK, excessive retransmissions are bad. This usually shows up as slow application performance and/or packet loss to the user</p>
+  </li>
+  <li>
+    <p><strong>tcp.analysis.window_update</strong> – this will graph the size of the TCP window throughout your transfer.  If you see this window size drop down to zero(or near zero) during your transfer it means the sender has backed off and is waiting for the receiver to acknowledge all of the data already sent.  This would indicate the receiving end is overwhelmed.</p>
+  </li>
+  <li>
+    <p><strong>tcp.analysis.bytes_in_flight</strong> – the number of unacknowledged bytes on the wire at a point in time.  The number of unacknowledged bytes should never exceed your TCP window size (defined in the initial 3 way TCP handshake) and to maximize your throughput you want to get as close as possible to the TCP window size.  If you see a number consistently lower than your TCP window size, it could indicate packet loss or some other issue along the path preventing you from maximizing throughput.</p>
+  </li>
+  <li>
+    <p><strong>tcp.analysis.ack_rtt</strong> – measures the time delta between capturing a TCP packet and the corresponding ACK for that packet. If this time is long it could indicate some type of delay in the network (packet loss, congestion, etc)</p>
+  </li>
+</ul>
+
+<p>Surprise surprise ;)</p>
+
+
+          
+          <div id="disqus_thread"></div>
+          <script>
+          (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://rollback0.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+          })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+  <div class="wrapper">
+    Copyright &copy; 2017-2018 <a href="http://twitter.com/jgeromero">"jgeromero"</a> Jorge -
+    Powered by <a href="http://jekyllrb.com/">Jekyll</a> and <a href="http://pages.github.com/">Github Pages</a>
+  </div>
+</div>
+
+
+    <script src="/js/master.js"></script>
+
+  </body>
+</html>

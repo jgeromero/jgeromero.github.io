@@ -1,4 +1,87 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-02-18T00:54:17-05:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Policy Statments for dynamic IGPs</title><link href="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html" rel="alternate" type="text/html" title="Policy Statments for dynamic IGPs" /><published>2018-02-18T00:16:00-05:00</published><updated>2018-02-18T00:16:00-05:00</updated><id>http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs</id><content type="html" xml:base="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html">&lt;h2&gt;Policy Statements for dynamic IGPs&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-04-01T20:37:14-04:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Troubleshooting Network Slowness</title><link href="http://localhost:4000/2018/04/01/troubleshooting-network-slowness.html" rel="alternate" type="text/html" title="Troubleshooting Network Slowness" /><published>2018-04-01T01:18:30-04:00</published><updated>2018-04-01T01:18:30-04:00</updated><id>http://localhost:4000/2018/04/01/troubleshooting-network-slowness</id><content type="html" xml:base="http://localhost:4000/2018/04/01/troubleshooting-network-slowness.html">&lt;h2&gt;Troubleshooting Network Slowness&lt;/h2&gt;
+
+&lt;h3&gt;First, let's go over some basics:&lt;/h3&gt;
+
+&lt;p&gt;Bandwidth vs Throughput&lt;/p&gt;
+
+&lt;p&gt;Bandwidth = How wide your channel is. Maximum amount of data that can travel through a channel.
+Throughput = How much data actually travels through the channel successfully. This can be limited by tons of different things.&lt;/p&gt;
+
+&lt;h3&gt;Things that may affect throughput:&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Latency&lt;/li&gt;
+  &lt;li&gt;Packet loss&lt;/li&gt;
+  &lt;li&gt;Network Congestion&lt;/li&gt;
+  &lt;li&gt;Small TCP Receive Windows&lt;/li&gt;
+  &lt;li&gt;Traffic shaping and Rate limiting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Maximum Transmission Units (MTU) in ethernet frames are by default 1500 bytes. There’s also a maximum segment size that’s agreed upon a session, looks something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/MTU-image-1.png&quot; alt=&quot;MTU-image&quot; title=&quot;MTU&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Path MTU Discovery&lt;/strong&gt; can be used to discover the maximum MTU size along the path of a TCP connection. You can use ping or tracepath (linux tool) to discover this MTU. Useful when implementing Jumbo Frames (Larger MTUs usually 9000 bytes). MTUs larger than the default should be supported along the path.&lt;/p&gt;
+
+&lt;h3&gt; Long Fat Networks (LFN): &lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;High Bandwidth, High Delay&lt;/strong&gt;. The idea behind this is you have a maximum (outstanding) amount of data on the wire on the way to the destination, while the sender is sitting idle waiting for acknowledgements for the data sent. This stop and wait is a waste of bandwidth, since the link is not being fully utilized.&lt;/p&gt;
+
+&lt;p&gt;There’s a concept of &lt;strong&gt;Bandwidth Delay Product (BDP)&lt;/strong&gt;, which is basically how much outstanding data (not acknowledged) you can ever have on the wire for a given time assuming perfect network conditions. If your Receive Window is smaller than your BDP (often the case with LFNs) then you waste precious bandwidth. The ideal case should be TCP windows fully opening to what the BDP is for that link.&lt;/p&gt;
+
+&lt;p&gt;BDP is calculated by taking the maximum data link capacity and multiplying it by the round trip delay &lt;strong&gt;(BxD)&lt;/strong&gt;, the results can be given in bits or bytes. LFN have high Bandwidth Delay Products because the amount of outstanding data on the wire lasts for longer time than those with lower BDPs. Therefore, TCP receive windows (max allowed unacknowledged data) negotiated at the beginning of sessions are stressed more often than those lighter not so fat networks. Remember: BDPs for a given link are assuming perfect network conditions.&lt;/p&gt;
+
+&lt;p&gt;As a solution to increasing throughput on LFNs, you either increase the TCP receive windows past 65K or lower the delay RTT. Window scaling was created for this reason (rfc7323).&lt;/p&gt;
+
+&lt;p&gt;However, here is where &lt;strong&gt;Congestion Control&lt;/strong&gt; comes in and &lt;strong&gt;Congestion Windows&lt;/strong&gt;. Even if your windows are large enough on the receiver side but your network conditions are not ideal (Congestion, Packet loss etc) your congestion window (which is dynamically adjusted by the protocol) will never fully open, causing you to get much lower throughput.&lt;/p&gt;
+
+&lt;p&gt;Here are two pictures showing what congestion windows look like during a TCP session:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/cwnd-and-rwnd-glossary.gif&quot; alt=&quot;CWND-image&quot; title=&quot;cwn-and-rwnd&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/cwnd-1024x203.png&quot; alt=&quot;CWND-image-2&quot; title=&quot;CWND&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt; Things to keep in mind &lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Congestion Windows are dynamically adjusted throughout the session and are greatly affected/limited by how well and healthy the condition of the network is. (Read more on TCP slow start, Slow Start Thresholds for more detail on congestion control)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Receive Windows are dynamically adjusted throughout session, with every ack the sender gets an updated window size, in a healthy network, the congestion window will quickly grow to the maximum window size negotiated. Limitations being max receive window sizes hard set at a number with no window scaling or application not picking up data fast enough from receive buffer. In any case, &lt;strong&gt;the sender is always bound by the cwnd&lt;/strong&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt; Finding root cause &lt;/h3&gt;
+
+&lt;p&gt;Use IPERF3 (leaner code base than iperf2) to test your throughput and see what your CWND looks like.&lt;/p&gt;
+
+&lt;p&gt;Perform tcpdumps while your iperf3 tests are running (Make sure to start your captures before firing your iperf test to capture 3 way handshake so you get proper window sizes negotiated at the beginning of session).&lt;/p&gt;
+
+&lt;p&gt;Load pcap caputure into wireshark and create IO graphs using the following filters (inspired by this &lt;a href=&quot;https://notalwaysthenetwork.com/2014/04/09/troubleshooting-with-wireshark-io-graphs-part-1/&quot;&gt;blog&lt;/a&gt; post):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.lost_segment&lt;/strong&gt; – Indicates we’ve seen a gap in sequence numbers in the capture.  Packet loss can lead to duplicate ACKs, which leads to retransmissions&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.duplicate_ack&lt;/strong&gt; – displays packets that were acknowledged more than one time.  A high number of duplicate ACKs is a sign of possible high latency between TCP endpoints&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.retransmission&lt;/strong&gt; – Displays all retransmissions in the capture.  A few retransmissions are OK, excessive retransmissions are bad. This usually shows up as slow application performance and/or packet loss to the user&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.window_update&lt;/strong&gt; – this will graph the size of the TCP window throughout your transfer.  If you see this window size drop down to zero(or near zero) during your transfer it means the sender has backed off and is waiting for the receiver to acknowledge all of the data already sent.  This would indicate the receiving end is overwhelmed.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.bytes_in_flight&lt;/strong&gt; – the number of unacknowledged bytes on the wire at a point in time.  The number of unacknowledged bytes should never exceed your TCP window size (defined in the initial 3 way TCP handshake) and to maximize your throughput you want to get as close as possible to the TCP window size.  If you see a number consistently lower than your TCP window size, it could indicate packet loss or some other issue along the path preventing you from maximizing throughput.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;tcp.analysis.ack_rtt&lt;/strong&gt; – measures the time delta between capturing a TCP packet and the corresponding ACK for that packet. If this time is long it could indicate some type of delay in the network (packet loss, congestion, etc)&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Surprise surprise ;)&lt;/p&gt;</content><author><name></name></author><category term="other" /><summary type="html">Troubleshooting Network Slowness</summary></entry><entry><title type="html">Policy Statments for dynamic IGPs</title><link href="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html" rel="alternate" type="text/html" title="Policy Statments for dynamic IGPs" /><published>2018-02-18T00:16:00-05:00</published><updated>2018-02-18T00:16:00-05:00</updated><id>http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs</id><content type="html" xml:base="http://localhost:4000/2018/02/18/policy-statements-for-dynamic-IGPs.html">&lt;h2&gt;Policy Statements for dynamic IGPs&lt;/h2&gt;
 
 &lt;p&gt;I thought about writing about this policy-statement I came across the other day:&lt;/p&gt;
 
@@ -30,4 +113,4 @@ jromero@mx-480&amp;gt; show route protocol direct
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="juniper" /><summary type="html">Policy Statements for dynamic IGPs</summary></entry><entry><title type="html">Welcome!</title><link href="http://localhost:4000/2018/01/26/welcome.html" rel="alternate" type="text/html" title="Welcome!" /><published>2018-01-26T20:53:34-05:00</published><updated>2018-01-26T20:53:34-05:00</updated><id>http://localhost:4000/2018/01/26/welcome</id><content type="html" xml:base="http://localhost:4000/2018/01/26/welcome.html">&lt;h2&gt;Welcome!&lt;/h2&gt;
 
-&lt;p&gt;Hi all, this blog will serve as a place holder for me to keep notes and share some of my technical experiences. Thank you for visiting.&lt;/p&gt;</content><author><name></name></author><category term="other" /><summary type="html">Welcome!</summary></entry></feed>
+&lt;p&gt;Hi all, this blog will serve as a place holder for notes and share some of my experiences. Thank you for visiting.&lt;/p&gt;</content><author><name></name></author><category term="other" /><summary type="html">Welcome!</summary></entry></feed>

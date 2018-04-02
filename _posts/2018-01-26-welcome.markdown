@@ -4,9 +4,8 @@ title:  "Welcome!"
 date:   2018-01-26 20:53:34 -0500
 tags:
   - other
-new: new
 ---
 
 <h2>Welcome!</h2>
 
-Hi all, this blog will serve as a place holder for me to keep notes and share some of my technical experiences. Thank you for visiting. 
+Hi all, this blog will serve as a place holder for notes and share some of my experiences. Thank you for visiting.

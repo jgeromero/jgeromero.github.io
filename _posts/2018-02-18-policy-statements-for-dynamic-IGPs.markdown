@@ -5,7 +5,6 @@ date:   2018-02-18 00:16:00 -0500
 comments: true
 tags:
   - juniper
-new: new
 ---
 
 <h2>Policy Statements for dynamic IGPs</h2>

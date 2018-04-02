@@ -33,7 +33,7 @@ Maximum Transmission Units (MTU) in ethernet frames are by default 1500 bytes. T
 
 <h3> Long Fat Networks (LFN): </h3>
 
-**High Bandwidth, High Delay**. The idea behind this is you have a maximum (outstanding) amount of data on the wire on the way to the destination, while the sender is sitting idle waiting for acknowledgements for the data sent. This stop and wait is a waste of bandwidth, since the link is not being fully utilized.
+If you're troubleshooting slowness on a **High Bandwidth, High Delay** link, this applies to you. The idea behind it is you have a maximum (outstanding) amount of data on the wire on the way to the destination, while the sender is sitting idle waiting for acknowledgements for the data sent. This stop and wait is a waste of bandwidth, since the link is not being fully utilized.
 
 There's a concept of **Bandwidth Delay Product (BDP)**, which is basically how much outstanding data (not acknowledged) you can ever have on the wire for a given time assuming perfect network conditions. If your Receive Window is smaller than your BDP (often the case with LFNs) then you waste precious bandwidth. The ideal case should be TCP windows fully opening to what the BDP is for that link.
 
@@ -75,4 +75,4 @@ Load pcap caputure into wireshark and create IO graphs using the following filte
 
 - **tcp.analysis.ack_rtt** – measures the time delta between capturing a TCP packet and the corresponding ACK for that packet. If this time is long it could indicate some type of delay in the network (packet loss, congestion, etc)
 
-Surprise surprise ;)
+TCP is a very complex protocol, but hopefully this post has provided some pointers to pinpoint slowness on your links. 

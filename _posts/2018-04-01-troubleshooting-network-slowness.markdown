@@ -25,21 +25,15 @@ Throughput = How much data actually travels through the channel successfully. Th
 - Small TCP Receive Windows
 - Traffic shaping and Rate limiting
 
-Maximum Transmission Units (MTU) in ethernet frames are by default 1500 bytes. There's also a maximum segment size that's agreed upon a session, looks something like this:
-
-![MTU-image]({{ site.baseurl }}/images/MTU-image-1.png "MTU")
-
-**Path MTU Discovery** can be used to discover the maximum MTU size along the path of a TCP connection. You can use ping or tracepath (linux tool) to discover this MTU. Useful when implementing Jumbo Frames (Larger MTUs usually 9000 bytes). MTUs larger than the default should be supported along the path.
-
 <h3> Long Fat Networks (LFN): </h3>
 
 If you're troubleshooting slowness on a **High Bandwidth, High Delay** link, this applies to you. The idea behind it is you have a maximum (outstanding) amount of data on the wire on the way to the destination, while the sender is sitting idle waiting for acknowledgements for the data sent. This stop and wait is a waste of bandwidth, since the link is not being fully utilized.
 
-There's a concept of **Bandwidth Delay Product (BDP)**, which is basically how much outstanding data (not acknowledged) you can ever have on the wire for a given time assuming perfect network conditions. If your Receive Window is smaller than your BDP (often the case with LFNs) then you waste precious bandwidth. The ideal case should be TCP windows fully opening to what the BDP is for that link.
+There's a concept of **Bandwidth Delay Product (BDP)**, which is basically how much outstanding data (not acknowledged) you can ever have on a wire for a given time assuming perfect network conditions. A link is considered a LFN when BDP exceeds 10^5 bits (12500 bytes). If your Receive Window is smaller than your BDP (often the case with LFNs) then you waste precious bandwidth. The ideal case should be TCP windows fully opening to what the BDP is for that link.
 
 BDP is calculated by taking the maximum data link capacity and multiplying it by the round trip delay **(BxD)**, the results can be given in bits or bytes. LFN have high Bandwidth Delay Products because the amount of outstanding data on the wire lasts for longer time than those with lower BDPs. Therefore, TCP receive windows (max allowed unacknowledged data) negotiated at the beginning of sessions are stressed more often than those lighter not so fat networks. Remember: BDPs for a given link are assuming perfect network conditions.
 
-As a solution to increasing throughput on LFNs, you either increase the TCP receive windows past 65K or lower the delay RTT. Window scaling was created for this reason (rfc7323).
+As a solution to increasing throughput on LFNs, you either increase the TCP receive windows past 65,535 bytes or lower the delay RTT. Window scaling was created for this reason (rfc7323).
 
 However, here is where **Congestion Control** comes in and **Congestion Windows**. Even if your windows are large enough on the receiver side but your network conditions are not ideal (Congestion, Packet loss etc) your congestion window (which is dynamically adjusted by the protocol) will never fully open, causing you to get much lower throughput.
 
@@ -75,4 +69,4 @@ Load pcap caputure into wireshark and create IO graphs using the following filte
 
 - **tcp.analysis.ack_rtt** – measures the time delta between capturing a TCP packet and the corresponding ACK for that packet. If this time is long it could indicate some type of delay in the network (packet loss, congestion, etc)
 
-TCP is a very complex protocol, but hopefully this post has provided some pointers to pinpoint slowness on your links. 
+TCP is a very complex protocol, but hopefully this post has provided some pointers to pinpoint slowness on your links.

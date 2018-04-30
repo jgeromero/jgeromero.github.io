@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Networking rants and findings, by jgeromero">
+
+    <title>Google Cloud Platform VPN load balancing — </title>
+
+    <link rel="stylesheet" href="/css/master.css">
+    <link rel="alternate" type="application/rss+xml" title="" href="http://localhost:4000/feed.xml">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  </head>
+  <body>
+    <div id="outer-wrapper">
+      <div id="wrapper">
+
+        <h1 class="blog-title">
+  <a href="/">Rollback0</a>
+</h1>
+
+<p class="blog-author">by Jorge</p>
+<p class="blog-slogan">Exploring Networking by example</p>
+
+
+        <div class="content">
+
+          <a href="/" class="back-to-front" title="Back to all posts">&larr; back</a>
+
+          <span class="post-num-words">
+            592 <span>words</span>
+          </span>
+
+          <span class="post-date">
+            29 April 2018
+          </span>
+
+          <h2>Google Cloud Platform VPN Load balancing</h2>
+
+<p>Recently I worked on a project to build and design a fault-tolerant network with multiple VPNs load balancing traffic in order to increase the aggregate vpn throughput from HQ to a virtual private cloud (VPC) network.</p>
+
+<p>Cloud VPNs at GCP support up to a maximum of 1.5Gbps per tunnel over public internet. One of the solutions to increase VPN throughput is to set up multiple tunnels forwarding the same IP range at different IPs on your on-premise (HQ) VPN gateway. This will cause the cloud VPN gateway to automatically load balance between the configured tunnels.</p>
+
+<p><strong>Note:</strong> This example assumes your on-premise VPN gateway’s throughput capabilities are supported.</p>
+
+<p>Our topology will look like this:</p>
+
+<p><img src="/images/GCP-Tunnels.jpg" alt="GCP-tunnels" title="GCP Tunnels" /></p>
+
+<ul>
+  <li>Total of 6 tunnels (3 in East1 region and 3 in East4) split between two cloud VPN Gateways.</li>
+  <li>Each of those tunnels will terminate in three different providers at our HQ SRX Cluster. In the event one goes down, there will be 2 other tunnels per region.</li>
+  <li>Cloud VPNs at GCP use ECMP (equal cost multi-path) to load balance traffic, we will use the same in our SRX cluster.</li>
+  <li>There will be two GCP network-tags that will be applied to our instances in East-1 and East-4 so they are properly routed out their corresponding VPN gateways forcing traffic to stay local to a given region.</li>
+</ul>
+
+<h3> Configuring Tunnels, Routes and Network Tags </h3>
+
+<p>We will start by having two VPN gateways, one in East-1 and another in East-4. Once we do that, we build our six tunnels forwarding the same subnet (in our case 10.0.0.0/8) to our three different peer IPs (provider-1, provider-2 and provider-3).</p>
+
+<p>In the end it should look like this:</p>
+
+<p><img src="/images/Tunnels.jpg" alt="tunnels" title="tunnels" /></p>
+
+<p>Now let’s create our VPC routes, we will forward 10.0.0.0/8 with our next-hop being the tunnels we created. We will also apply these routes to any instance that have the network-tags <code class="highlighter-rouge">routes-us-east1</code> and <code class="highlighter-rouge">routes-us-east4</code> this is so VPN traffic for east1 and east4 egress through their corresponding cloud VPN gateways local to their region. A note about the routes above, since we use three routes per region pointing to our tunnels, this could probably have been done with a single route. However, I was not able to confirm if load balancing will take place by pointing it to a single tunnel as my next-hop.</p>
+
+<p>Our routes should look like this:</p>
+
+<p><img src="/images/routes.jpg" alt="routes" title="routes" /></p>
+
+<h3> Configuring our SRX </h3>
+
+<p>As mentioned earlier, since we have multiple next-hop addresses (our tunnel interfaces) for the same destination (east1 and east4) with equal cost, Equal-cost multipath (ECMP) is a perfect candidate to use for this particular scenario.</p>
+
+<p>After configuring our VPN tunnels, we should’ve ended up with the following tunnel interfaces: <code class="highlighter-rouge">st0.40, st0.41, st0.42, st0.43, st0.44 and st0.45</code></p>
+
+<p>We then add the following static routes:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[edit routing-options static]
++    route 10.142.0.0/20 next-hop [ st0.40 st0.41 st0.42 ];
++    route 10.150.0.0/20 next-hop [ st0.43 st0.44 st0.45 ];
+</code></pre></div></div>
+
+<p>Configure ECMP for our GCP routes:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[edit routing-options]
++   forwarding-table {
++       export GCP-load-balancing-policy;
++   }
+[edit policy-options]
++   policy-statement GCP-load-balancing-policy {
++       from {
++           route-filter 10.142.0.0/20 orlonger;
++           route-filter 10.150.0.0/20 orlonger;
++       }
++       then {
++           load-balance per-packet;
++       }
++   }
+</code></pre></div></div>
+
+<p>Commit your configuration, configure your instances to use the network tags set up and traffic should start to load balance nicely across all your tunnels, here’s a snapshot of our network graphs:</p>
+
+<p><img src="/images/grafana-dash.jpg" alt="dash" title="dash" /></p>
+
+
+          
+          <div id="disqus_thread"></div>
+          <script>
+          (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://rollback0.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+          })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+  <div class="wrapper">
+    Copyright &copy; 2017-2018 <a href="http://twitter.com/jgeromero">"jgeromero"</a> Jorge -
+    Powered by <a href="http://jekyllrb.com/">Jekyll</a> and <a href="http://pages.github.com/">Github Pages</a>
+  </div>
+</div>
+
+
+    <script src="/js/master.js"></script>
+
+  </body>
+</html>

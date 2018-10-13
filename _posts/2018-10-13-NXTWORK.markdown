@@ -1,0 +1,39 @@
+---
+layout: post
+title:  "Highlights from NXTWORK 2018"
+date:   2018-10-13 00:12:21 -0500
+comments: true
+tags:
+  - juniper
+new: new
+---
+
+<h2>Highlights from NXTWORK 2018</h2>
+
+A few highlights I wanted to share from this year's Juniper Networks customer and partner summit in Las Vegas:
+
+* This year’s theme is “Engineering Simplicity” which revolves around the idea that complexity is a hard challenge to solve for customers. They believe in developing products to simplify the management of different environments across on-prem private clouds and public clouds is key.
+
+![Engineering-Simplicity]({{ site.baseurl }}/images/Engineering-Simplicity.jpeg "Engineering Simplicity")
+
+* Different eras of networking, from the scale-up era (1990s), scale out era (2000s) and the era of multi-cloud where we are now.
+
+![Eras-of-Networking]({{ site.baseurl }}/images/Eras-of-Networking.jpeg "Eras of Networking")
+
+* Juniper believes the journey through those eras to be divided into 5 steps, from human driven (CLI) all the way to self driven networks. For them the industry right now is between step 2 and step 3 (building “intent” into networks and pushing workflows through automation tools, such as space or ansible).
+
+![multicloud-journey]({{ site.baseurl }}/images/multicloud-journey.jpeg "Multicloud Journey")
+
+* Multi-cloud was a big topic this year and how challenging the management across both public and private clouds is becoming burdensome to customers. They think the answer to this is their new platform called Contrail Enterprise Multi-cloud.
+
+* A partnership with Nutanix was announced, going back to their theme of simplicity, pairing this up with contrail will allow teams to focus on intent and processes leaving the manual work to the underlying technologies.
+
+<h3> Tools or other things I found interesting: </h3>
+
+Panasonic RSU network
+
+Corero (DDoS Mitigation Platform)
+
+Juniper Sky (Think of space but IaaS)
+
+cSRX (containerized version of SRX)

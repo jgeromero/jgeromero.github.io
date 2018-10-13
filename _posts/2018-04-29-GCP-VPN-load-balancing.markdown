@@ -5,7 +5,6 @@ date:   2018-04-29 00:19:55 -0500
 comments: true
 tags:
   - other
-new: new
 ---
 
 <h2>Google Cloud Platform VPN Load balancing</h2>

@@ -1,4 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-04-29T21:44:17-04:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Google Cloud Platform VPN load balancing</title><link href="http://localhost:4000/2018/04/29/GCP-VPN-load-balancing.html" rel="alternate" type="text/html" title="Google Cloud Platform VPN load balancing" /><published>2018-04-29T01:19:55-04:00</published><updated>2018-04-29T01:19:55-04:00</updated><id>http://localhost:4000/2018/04/29/GCP-VPN-load-balancing</id><content type="html" xml:base="http://localhost:4000/2018/04/29/GCP-VPN-load-balancing.html">&lt;h2&gt;Google Cloud Platform VPN Load balancing&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-10-13T12:45:37-04:00</updated><id>http://localhost:4000/</id><title type="html">Rollback0</title><subtitle>Networking rants and findings, by jgeromero</subtitle><entry><title type="html">Highlights from NXTWORK 2018</title><link href="http://localhost:4000/2018/10/13/NXTWORK.html" rel="alternate" type="text/html" title="Highlights from NXTWORK 2018" /><published>2018-10-13T01:12:21-04:00</published><updated>2018-10-13T01:12:21-04:00</updated><id>http://localhost:4000/2018/10/13/NXTWORK</id><content type="html" xml:base="http://localhost:4000/2018/10/13/NXTWORK.html">&lt;h2&gt;Highlights from NXTWORK 2018&lt;/h2&gt;
+
+&lt;p&gt;A few highlights I wanted to share from this year’s Juniper Networks customer and partner summit in Las Vegas:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;This year’s theme is “Engineering Simplicity” which revolves around the idea that complexity is a hard challenge to solve for customers. They believe in developing products to simplify the management of different environments across on-prem private clouds and public clouds is key.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Engineering-Simplicity.jpeg&quot; alt=&quot;Engineering-Simplicity&quot; title=&quot;Engineering Simplicity&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Different eras of networking, from the scale-up era (1990s), scale out era (2000s) and the era of multi-cloud where we are now.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Eras-of-Networking.jpeg&quot; alt=&quot;Eras-of-Networking&quot; title=&quot;Eras of Networking&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Juniper believes the journey through those eras to be divided into 5 steps, from human driven (CLI) all the way to self driven networks. For them the industry right now is between step 2 and step 3 (building “intent” into networks and pushing workflows through automation tools, such as space or ansible).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/multicloud-journey.jpeg&quot; alt=&quot;multicloud-journey&quot; title=&quot;Multicloud Journey&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Multi-cloud was a big topic this year and how challenging the management across both public and private clouds is becoming burdensome to customers. They think the answer to this is their new platform called Contrail Enterprise Multi-cloud.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A partnership with Nutanix was announced, going back to their theme of simplicity, pairing this up with contrail will allow teams to focus on intent and processes leaving the manual work to the underlying technologies.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt; Tools or other things I found interesting: &lt;/h3&gt;
+
+&lt;p&gt;Panasonic RSU network&lt;/p&gt;
+
+&lt;p&gt;Corero (DDoS Mitigation Platform)&lt;/p&gt;
+
+&lt;p&gt;Juniper Sky (Think of space but IaaS)&lt;/p&gt;
+
+&lt;p&gt;cSRX (containerized version of SRX)&lt;/p&gt;</content><author><name></name></author><category term="juniper" /><summary type="html">Highlights from NXTWORK 2018</summary></entry><entry><title type="html">Google Cloud Platform VPN load balancing</title><link href="http://localhost:4000/2018/04/29/GCP-VPN-load-balancing.html" rel="alternate" type="text/html" title="Google Cloud Platform VPN load balancing" /><published>2018-04-29T01:19:55-04:00</published><updated>2018-04-29T01:19:55-04:00</updated><id>http://localhost:4000/2018/04/29/GCP-VPN-load-balancing</id><content type="html" xml:base="http://localhost:4000/2018/04/29/GCP-VPN-load-balancing.html">&lt;h2&gt;Google Cloud Platform VPN Load balancing&lt;/h2&gt;
 
 &lt;p&gt;Recently I worked on a project to build and design a fault-tolerant network with multiple VPNs load balancing traffic in order to increase the aggregate vpn throughput from HQ to a virtual private cloud (VPC) network.&lt;/p&gt;
 

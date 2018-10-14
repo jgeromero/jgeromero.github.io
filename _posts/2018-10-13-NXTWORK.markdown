@@ -34,6 +34,6 @@ Panasonic RSU network
 
 Corero (DDoS Mitigation Platform)
 
-Juniper Sky (Think of space but IaaS)
+Juniper Sky (Think of space but SaaS)
 
 cSRX (containerized version of SRX)
